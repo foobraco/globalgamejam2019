@@ -14,6 +14,7 @@ namespace PC2D
         public GameObject visualChild;
 
         private PlatformerMotor2D _motor;
+        private PlayerController2D playerController;
         private Animator _animator;
         private bool _isJumping;
         private bool _currentFacingLeft;
@@ -22,6 +23,7 @@ namespace PC2D
         void Start()
         {
             _motor = GetComponent<PlatformerMotor2D>();
+            playerController = GetComponent<PlayerController2D>();
             _animator = visualChild.GetComponent<Animator>();
             _animator.Play("Idle");
 
@@ -86,7 +88,15 @@ namespace PC2D
                     }
                     else
                     {
-                        _animator.Play("Idle");
+                        if (playerController.isChargingJump)
+                        {
+                            _animator.Play("Jump");
+                        }
+                        else
+                        {
+                            _animator.Play("Idle");
+                        }
+
                     }
                 }
             }
@@ -100,7 +110,7 @@ namespace PC2D
             {
                 valueCheck = _motor.velocity.x;
             }
-            
+
             if (Mathf.Abs(valueCheck) >= 0.1f)
             {
                 Vector3 newScale = visualChild.transform.localScale;

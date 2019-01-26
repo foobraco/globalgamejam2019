@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Timeline;
 
 /// <summary>
 /// This class is a simple example of how to build a controller that interacts with PlatformerMotor2D.
@@ -6,15 +7,27 @@ using UnityEngine;
 [RequireComponent(typeof(PlatformerMotor2D))]
 public class PlayerController2D : MonoBehaviour
 {
+    [HideInInspector]
+    public bool isChargingJump;
+
+    [SerializeField]
+    private float rechargedJumpHeigt = 6f;
+    [SerializeField]
+    private float rechargedJumpTime = 1f;
+
     private PlatformerMotor2D _motor;
     private bool _restored = true;
     private bool _enableOneWayPlatforms;
     private bool _oneWayPlatformsAreWalls;
 
+    private float timeChargingJump;
+    private float defaultJumpHeight;
+
     // Use this for initialization
     void Start()
     {
         _motor = GetComponent<PlatformerMotor2D>();
+        defaultJumpHeight = _motor.jumpHeight;
     }
 
     // before enter en freedom state for ladders
@@ -48,15 +61,43 @@ public class PlayerController2D : MonoBehaviour
             FreedomStateRestore(_motor);
         }
 
+        //if (_motor.IsGrounded() && _motor.jumpHeight != defaultJumpHeight)
+        //{
+        //    _motor.jumpHeight = defaultJumpHeight;
+        //}
+
         // Jump?
         // If you want to jump in ladders, leave it here, otherwise move it down
         if (Input.GetButtonDown(PC2D.Input.JUMP))
         {
-            _motor.Jump();
-            _motor.DisableRestrictedArea();
+            isChargingJump = true;
+            timeChargingJump = 0f;
         }
 
-        _motor.jumpingHeld = Input.GetButton(PC2D.Input.JUMP);
+        if (isChargingJump)
+        {
+            timeChargingJump += Time.deltaTime;
+        }
+
+        if (Input.GetButtonUp(PC2D.Input.JUMP))
+        {
+            if (timeChargingJump >= rechargedJumpTime)
+            {
+                _motor.jumpHeight = rechargedJumpHeigt;
+                _motor.Jump();
+                _motor.DisableRestrictedArea();
+                _motor.jumpHeight = defaultJumpHeight;
+            }
+            else
+            {
+                _motor.Jump();
+                _motor.DisableRestrictedArea();
+            }
+            timeChargingJump = 0f;
+            isChargingJump = false;
+        }
+
+        //_motor.jumpingHeld = Input.GetButton(PC2D.Input.JUMP);
 
         // XY freedom movement
         if (_motor.motorState == PlatformerMotor2D.MotorState.FreedomState)
