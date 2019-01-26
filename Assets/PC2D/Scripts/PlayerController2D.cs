@@ -7,13 +7,33 @@ using UnityEngine.Timeline;
 [RequireComponent(typeof(PlatformerMotor2D))]
 public class PlayerController2D : MonoBehaviour
 {
+    public enum CarryingState
+    {
+        NotCarrying,
+        Carrying
+    }
+
+    [HideInInspector]
+    public CarryingState carryingState;
+    [HideInInspector]
+    public GameObject carryingItem;
+
     [HideInInspector]
     public bool isChargingJump;
+    [HideInInspector]
+    public bool isCarryingItem;
 
     [SerializeField]
-    private float rechargedJumpHeigt = 6f;
+    private float rechargedJumpHeight = 6f;
     [SerializeField]
     private float rechargedJumpTime = 1f;
+    [SerializeField]
+    private float carryingGroundSpeed = 2f;
+    [SerializeField]
+    private float carryingJumpHeight = 2f;
+    [SerializeField]
+    private float carryingJumpSpeed = 2f;
+
 
     private PlatformerMotor2D _motor;
     private bool _restored = true;
@@ -22,12 +42,18 @@ public class PlayerController2D : MonoBehaviour
 
     private float timeChargingJump;
     private float defaultJumpHeight;
+    private float defaultGroundSpeed;
+    private float defaultAirSpeed;
+    private bool isInItem;
+    private GameObject nearestItem;
 
     // Use this for initialization
     void Start()
     {
         _motor = GetComponent<PlatformerMotor2D>();
         defaultJumpHeight = _motor.jumpHeight;
+        defaultGroundSpeed = _motor.groundSpeed;
+        defaultAirSpeed = _motor.airSpeed;
     }
 
     // before enter en freedom state for ladders
@@ -81,9 +107,9 @@ public class PlayerController2D : MonoBehaviour
 
         if (Input.GetButtonUp(PC2D.Input.JUMP))
         {
-            if (timeChargingJump >= rechargedJumpTime)
+            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
             {
-                _motor.jumpHeight = rechargedJumpHeigt;
+                _motor.jumpHeight = rechargedJumpHeight;
                 _motor.Jump();
                 _motor.DisableRestrictedArea();
                 _motor.jumpHeight = defaultJumpHeight;
@@ -159,5 +185,51 @@ public class PlayerController2D : MonoBehaviour
         {
             _motor.Dash();
         }
+
+        if (Input.GetButtonDown(PC2D.Input.GRAB) && isInItem)
+        {
+            Carrying();
+        }
+
+        if (Input.GetButtonUp(PC2D.Input.GRAB) && isCarryingItem)
+        {
+            NotCarrying();
+        }
+    }
+
+    private void NotCarrying()
+    {
+        isCarryingItem = false;
+        carryingItem.GetComponent<Item>().ReleaseItem();
+        _motor.groundSpeed = defaultGroundSpeed;
+        _motor.jumpHeight = defaultJumpHeight;
+        _motor.airSpeed = defaultAirSpeed;
+    }
+
+    private void Carrying()
+    {
+        nearestItem.transform.parent = transform;
+        carryingItem = nearestItem;
+        carryingItem.GetComponent<SpriteRenderer>().enabled = false;
+        isCarryingItem = true;
+        _motor.groundSpeed = carryingGroundSpeed;
+        _motor.jumpHeight = carryingJumpHeight;
+        _motor.airSpeed = carryingJumpSpeed;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Item"))
+        {
+            Debug.Log("Is collisioning with player");
+            isInItem = true;
+            nearestItem = collision.gameObject;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        isInItem = false;
+        nearestItem = null;
     }
 }
