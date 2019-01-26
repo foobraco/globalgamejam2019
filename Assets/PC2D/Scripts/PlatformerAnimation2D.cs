@@ -84,7 +84,14 @@ namespace PC2D
                 {
                     if (_motor.velocity.sqrMagnitude >= 0.1f * 0.1f)
                     {
-                        _animator.Play("Walk");
+                        if (playerController.isCarryingItem)
+                        {
+                            _animator.Play("On Corner");
+                        }
+                        else
+                        {
+                            _animator.Play("Walk");
+                        }
                     }
                     else
                     {
@@ -94,7 +101,15 @@ namespace PC2D
                         }
                         else
                         {
-                            _animator.Play("Idle");
+                            if (playerController.isCarryingItem)
+                            {
+                                _animator.Play("On Corner");
+                            }
+                            else
+                            {
+                                _animator.Play("Idle");
+                            }
+
                         }
 
                     }
