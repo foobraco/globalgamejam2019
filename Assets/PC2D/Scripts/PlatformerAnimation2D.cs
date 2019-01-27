@@ -100,29 +100,23 @@ namespace PC2D
                             _animator.Play("Walk");
                         }
                     }
+
                     else
                     {
-                        if (playerController.isChargingJump)
+                        if (playerController.hasNotMovedYet)
                         {
-                            if (playerController.isCarryingItem)
-                            {
-                                _animator.Play("Fall");
-                            }
-                            else
-                            {
-                                _animator.Play("Fall");
-                            }
+                            _animator.Play("Sitting");
+                        }
+                        else if (playerController.isStartingToMove)
+                        {
+                            _animator.Play("StandUp");
+                            Invoke("StartMoving", 1f);
                         }
                         else
                         {
-                            if (playerController.hasNotMovedYet)
+                            if (playerController.isChargingJump)
                             {
                                 _animator.Play("Sitting");
-                            }
-                            else if (playerController.isStartingToMove)
-                            {
-                                _animator.Play("StandUp");
-                                Invoke("StartMoving", 1f);
                             }
                             else
                             {
@@ -135,9 +129,7 @@ namespace PC2D
                                     _animator.Play("Idle");
                                 }
                             }
-
                         }
-
                     }
                 }
             }

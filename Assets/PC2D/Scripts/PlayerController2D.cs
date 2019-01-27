@@ -123,13 +123,16 @@ public class PlayerController2D : MonoBehaviour
                 hasNotMovedYet = false;
                 isStartingToMove = true;
             }
-            isChargingJump = true;
-            timeChargingJump = 0f;
         }
 
-        if (isChargingJump)
+        if (_motor.normalizedXMovement == 0f && InputManager.ActiveDevice.Direction.Down.IsPressed)
         {
-            timeChargingJump += Time.deltaTime;
+            isChargingJump = true;
+        }
+
+        if (InputManager.ActiveDevice.Direction.Down.WasReleased)
+        {
+            isChargingJump = false;
         }
 
         if (InputManager.ActiveDevice.Action1.WasPressed)
@@ -276,8 +279,6 @@ public class PlayerController2D : MonoBehaviour
         // If you want to jump in ladders, leave it here, otherwise move it down
         if (Input.GetButtonDown(PC2D.Input.JUMP))
         {
-            isChargingJump = true;
-            timeChargingJump = 0f;
             if (hasNotMovedYet)
             {
                 hasNotMovedYet = false;
@@ -285,9 +286,14 @@ public class PlayerController2D : MonoBehaviour
             }
         }
 
-        if (isChargingJump)
+        if (_motor.normalizedXMovement == 0 && Input.GetAxis(PC2D.Input.VERTICAL) < 0f)
         {
-            timeChargingJump += Time.deltaTime;
+            isChargingJump = true;
+        }
+
+        if (Input.GetAxis(PC2D.Input.VERTICAL) == 0f)
+        {
+            isChargingJump = false;
         }
 
         if (Input.GetButtonDown(PC2D.Input.JUMP))
