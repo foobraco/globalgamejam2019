@@ -34,6 +34,10 @@ public class PlayerController2D : MonoBehaviour
     private float carryingJumpHeight = 2f;
     [SerializeField]
     private float carryingJumpSpeed = 2f;
+    [SerializeField]
+    private AudioClip walkClip;
+    [SerializeField]
+    private AudioClip jumpClip;
 
 
     private PlatformerMotor2D _motor;
@@ -47,11 +51,13 @@ public class PlayerController2D : MonoBehaviour
     private float defaultAirSpeed;
     private bool isInItem;
     private GameObject nearestItem;
+    private AudioSource audioSource;
 
     // Use this for initialization
     void Start()
     {
         _motor = GetComponent<PlatformerMotor2D>();
+        audioSource = GetComponent<AudioSource>();
         defaultJumpHeight = _motor.jumpHeight;
         defaultGroundSpeed = _motor.groundSpeed;
         defaultAirSpeed = _motor.airSpeed;
@@ -116,9 +122,9 @@ public class PlayerController2D : MonoBehaviour
             timeChargingJump += Time.deltaTime;
         }
 
-        if (InputManager.ActiveDevice.Action1.WasReleased)
+        if (InputManager.ActiveDevice.Action1.WasPressed)
         {
-            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
+            if (InputManager.ActiveDevice.Direction.Down.IsPressed && !isCarryingItem)
             {
                 _motor.jumpHeight = rechargedJumpHeight;
                 _motor.Jump();
@@ -130,6 +136,7 @@ public class PlayerController2D : MonoBehaviour
                 _motor.Jump();
                 _motor.DisableRestrictedArea();
             }
+            audioSource.PlayOneShot(jumpClip);
             timeChargingJump = 0f;
             isChargingJump = false;
         }
@@ -149,6 +156,11 @@ public class PlayerController2D : MonoBehaviour
         if (Mathf.Abs(InputManager.ActiveDevice.Direction.X) > PC2D.Globals.INPUT_THRESHOLD)
         {
             _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
+            if (!audioSource.isPlaying && _motor.IsGrounded())
+            {
+                audioSource.clip = walkClip;
+                audioSource.Play();
+            }
         }
         else
         {
@@ -235,9 +247,9 @@ public class PlayerController2D : MonoBehaviour
             timeChargingJump += Time.deltaTime;
         }
 
-        if (Input.GetButtonUp(PC2D.Input.JUMP))
+        if (Input.GetButtonDown(PC2D.Input.JUMP))
         {
-            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
+            if (Input.GetAxis(PC2D.Input.VERTICAL) < 0f && !isCarryingItem)
             {
                 _motor.jumpHeight = rechargedJumpHeight;
                 _motor.Jump();
@@ -249,6 +261,7 @@ public class PlayerController2D : MonoBehaviour
                 _motor.Jump();
                 _motor.DisableRestrictedArea();
             }
+            audioSource.PlayOneShot(jumpClip);
             timeChargingJump = 0f;
             isChargingJump = false;
         }
@@ -268,10 +281,17 @@ public class PlayerController2D : MonoBehaviour
         if (Mathf.Abs(Input.GetAxis(PC2D.Input.HORIZONTAL)) > PC2D.Globals.INPUT_THRESHOLD)
         {
             _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+            if (!audioSource.isPlaying && _motor.IsGrounded())
+            {
+                audioSource.clip = walkClip;
+                audioSource.Play();
+            }
         }
         else
         {
             _motor.normalizedXMovement = 0;
+            audioSource.Stop();
+            audioSource.clip = null;
         }
 
         if (Input.GetAxis(PC2D.Input.VERTICAL) != 0)

@@ -39,7 +39,7 @@ namespace PC2D
                                  _motor.motorState == PlatformerMotor2D.MotorState.FallingFast))
             {
                 _isJumping = true;
-                _animator.Play("Jump");
+                _animator.Play("Fall");
 
                 if (_motor.velocity.x <= -0.1f)
                 {
@@ -61,7 +61,14 @@ namespace PC2D
                 if (_motor.motorState == PlatformerMotor2D.MotorState.Falling ||
                                  _motor.motorState == PlatformerMotor2D.MotorState.FallingFast)
                 {
-                    _animator.Play("Fall");
+                    if (playerController.isCarryingItem)
+                    {
+                        _animator.Play("CarryJump");
+                    }
+                    else
+                    {
+                        _animator.Play("Jump");
+                    }
                 }
                 else if (_motor.motorState == PlatformerMotor2D.MotorState.WallSliding ||
                          _motor.motorState == PlatformerMotor2D.MotorState.WallSticking)
@@ -99,11 +106,11 @@ namespace PC2D
                         {
                             if (playerController.isCarryingItem)
                             {
-                                _animator.Play("CarryJump");
+                                _animator.Play("Fall");
                             }
                             else
                             {
-                                _animator.Play("Jump");
+                                _animator.Play("Fall");
                             }
                         }
                         else
