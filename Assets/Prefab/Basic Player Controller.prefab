@@ -250,6 +250,8 @@ MonoBehaviour:
   carryingItem: {fileID: 0}
   isChargingJump: 0
   isCarryingItem: 0
+  hasNotMovedYet: 0
+  isStartingToMove: 0
   rechargedJumpHeight: 20
   rechargedJumpTime: 0.5
   carryingGroundSpeed: 4
