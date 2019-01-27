@@ -116,7 +116,7 @@ namespace PC2D
                         {
                             if (playerController.isChargingJump)
                             {
-                                _animator.Play("Sitting");
+                                _animator.Play("ChargeJump");
                             }
                             else
                             {
