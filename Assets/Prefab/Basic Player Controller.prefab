@@ -184,19 +184,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   additionalRaycastsPerSide: 0
-  groundSpeed: 4
+  groundSpeed: 10
   timeToGroundSpeed: 0.1
   groundStopDistance: 0.333
   airSpeed: 5
   changeDirectionInAir: 1
   timeToAirSpeed: 0.2
   airStopDistance: 2
-  fallSpeed: 3
+  fallSpeed: 4
   gravityMultiplier: 2
   fastFallSpeed: 32
   fastFallGravityMultiplier: 4
   ladderSpeed: 5
-  jumpHeight: 4
+  jumpHeight: 8
   extraJumpHeight: 1.5
   numOfAirJumps: 0
   jumpWindowWhenFalling: 0.2
