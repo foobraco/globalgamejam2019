@@ -81,6 +81,15 @@ public class PlayerController2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (InputManager.ActiveDevice != null)
+        {
+            UpdateWithController();
+        }
+        UpdateWithKeyboard();
+    }
+
+    private void UpdateWithController()
+    {
         Debug.Log("X value for " + InputManager.ActiveDevice.Direction.X);
         // use last state to restore some ladder specific values
         if (_motor.motorState != PlatformerMotor2D.MotorState.FreedomState)
@@ -194,6 +203,125 @@ public class PlayerController2D : MonoBehaviour
         }
 
         if (InputManager.ActiveDevice.Action3.WasReleased && isCarryingItem)
+        {
+            NotCarrying();
+        }
+    }
+
+    private void UpdateWithKeyboard()
+    {
+        // use last state to restore some ladder specific values
+        if (_motor.motorState != PlatformerMotor2D.MotorState.FreedomState)
+        {
+            // try to restore, sometimes states are a bit messy because change too much in one frame
+            FreedomStateRestore(_motor);
+        }
+
+        //if (_motor.IsGrounded() && _motor.jumpHeight != defaultJumpHeight)
+        //{
+        //    _motor.jumpHeight = defaultJumpHeight;
+        //}
+
+        // Jump?
+        // If you want to jump in ladders, leave it here, otherwise move it down
+        if (Input.GetButtonDown(PC2D.Input.JUMP))
+        {
+            isChargingJump = true;
+            timeChargingJump = 0f;
+        }
+
+        if (isChargingJump)
+        {
+            timeChargingJump += Time.deltaTime;
+        }
+
+        if (Input.GetButtonUp(PC2D.Input.JUMP))
+        {
+            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
+            {
+                _motor.jumpHeight = rechargedJumpHeight;
+                _motor.Jump();
+                _motor.DisableRestrictedArea();
+                _motor.jumpHeight = defaultJumpHeight;
+            }
+            else
+            {
+                _motor.Jump();
+                _motor.DisableRestrictedArea();
+            }
+            timeChargingJump = 0f;
+            isChargingJump = false;
+        }
+
+        //_motor.jumpingHeld = Input.GetButton(PC2D.Input.JUMP);
+
+        // XY freedom movement
+        if (_motor.motorState == PlatformerMotor2D.MotorState.FreedomState)
+        {
+            _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+            _motor.normalizedYMovement = Input.GetAxis(PC2D.Input.VERTICAL);
+
+            return; // do nothing more
+        }
+
+        // X axis movement
+        if (Mathf.Abs(Input.GetAxis(PC2D.Input.HORIZONTAL)) > PC2D.Globals.INPUT_THRESHOLD)
+        {
+            _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+        }
+        else
+        {
+            _motor.normalizedXMovement = 0;
+        }
+
+        if (Input.GetAxis(PC2D.Input.VERTICAL) != 0)
+        {
+            bool up_pressed = Input.GetAxis(PC2D.Input.VERTICAL) > 0;
+            if (_motor.IsOnLadder())
+            {
+                if (
+                    (up_pressed && _motor.ladderZone == PlatformerMotor2D.LadderZone.Top)
+                    ||
+                    (!up_pressed && _motor.ladderZone == PlatformerMotor2D.LadderZone.Bottom)
+                 )
+                {
+                    // do nothing!
+                }
+                // if player hit up, while on the top do not enter in freeMode or a nasty short jump occurs
+                else
+                {
+                    // example ladder behaviour
+
+                    _motor.FreedomStateEnter(); // enter freedomState to disable gravity
+                    _motor.EnableRestrictedArea();  // movements is retricted to a specific sprite bounds
+
+                    // now disable OWP completely in a "trasactional way"
+                    FreedomStateSave(_motor);
+                    _motor.enableOneWayPlatforms = false;
+                    _motor.oneWayPlatformsAreWalls = false;
+
+                    // start XY movement
+                    _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+                    _motor.normalizedYMovement = Input.GetAxis(PC2D.Input.VERTICAL);
+                }
+            }
+        }
+        else if (Input.GetAxis(PC2D.Input.VERTICAL) < -PC2D.Globals.FAST_FALL_THRESHOLD)
+        {
+            _motor.fallFast = false;
+        }
+
+        if (Input.GetButtonDown(PC2D.Input.DASH))
+        {
+            _motor.Dash();
+        }
+
+        if (Input.GetButtonDown(PC2D.Input.GRAB) && isInItem)
+        {
+            Carrying();
+        }
+
+        if (Input.GetButtonUp(PC2D.Input.GRAB) && isCarryingItem)
         {
             NotCarrying();
         }
