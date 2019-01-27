@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Timeline;
 using InControl;
+using Cinemachine;
 
 /// <summary>
 /// This class is a simple example of how to build a controller that interacts with PlatformerMotor2D.
@@ -42,6 +43,8 @@ public class PlayerController2D : MonoBehaviour
     private AudioClip walkClip;
     [SerializeField]
     private AudioClip jumpClip;
+    [SerializeField]
+    private CinemachineVirtualCamera closeUpCamera;
 
 
     private PlatformerMotor2D _motor;
@@ -427,6 +430,7 @@ public class PlayerController2D : MonoBehaviour
     public void ItStartedToMove()
     {
         isStartingToMove = false;
+        closeUpCamera.gameObject.SetActive(false);
     }
 
     private void NotCarrying()
