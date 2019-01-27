@@ -61,6 +61,7 @@ public class Item : MonoBehaviour
             cameraToTransition.gameObject.SetActive(true);
         }
         transform.parent.GetComponent<PlayerController2D>().isCarryingItem = false;
+        transform.parent.GetComponent<PlayerController2D>().ReturnNormalValues();
         Invoke("DeactivateCamera", 6f);
     }
 

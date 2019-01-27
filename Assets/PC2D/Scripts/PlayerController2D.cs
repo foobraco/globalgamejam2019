@@ -438,6 +438,13 @@ public class PlayerController2D : MonoBehaviour
         _motor.airSpeed = defaultAirSpeed;
     }
 
+    public void ReturnNormalValues()
+    {
+        _motor.groundSpeed = defaultGroundSpeed;
+        _motor.jumpHeight = defaultJumpHeight;
+        _motor.airSpeed = defaultAirSpeed;
+    }
+
     private void Carrying()
     {
         nearestItem.transform.parent = transform;
