@@ -240,7 +240,7 @@ public class PlayerController2D : MonoBehaviour
             _motor.fallFast = false;
         }
 
-        if (InputManager.ActiveDevice.Action2.WasPressed)
+        if (InputManager.ActiveDevice.Action2.WasPressed && !isCarryingItem)
         {
             _motor.Dash();
             if (hasNotMovedYet)
@@ -403,7 +403,7 @@ public class PlayerController2D : MonoBehaviour
             _motor.fallFast = false;
         }
 
-        if (Input.GetButtonDown(PC2D.Input.DASH))
+        if (Input.GetButtonDown(PC2D.Input.DASH) && !isCarryingItem)
         {
             if (hasNotMovedYet)
             {
