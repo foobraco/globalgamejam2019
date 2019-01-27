@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Timeline;
 using InControl;
+using Cinemachine;
 
 /// <summary>
 /// This class is a simple example of how to build a controller that interacts with PlatformerMotor2D.
@@ -42,6 +43,8 @@ public class PlayerController2D : MonoBehaviour
     private AudioClip walkClip;
     [SerializeField]
     private AudioClip jumpClip;
+    [SerializeField]
+    private CinemachineVirtualCamera closeUpCamera;
 
 
     private PlatformerMotor2D _motor;
@@ -240,7 +243,7 @@ public class PlayerController2D : MonoBehaviour
             _motor.fallFast = false;
         }
 
-        if (InputManager.ActiveDevice.Action2.WasPressed)
+        if (InputManager.ActiveDevice.Action2.WasPressed && !isCarryingItem)
         {
             _motor.Dash();
             if (hasNotMovedYet)
@@ -403,7 +406,7 @@ public class PlayerController2D : MonoBehaviour
             _motor.fallFast = false;
         }
 
-        if (Input.GetButtonDown(PC2D.Input.DASH))
+        if (Input.GetButtonDown(PC2D.Input.DASH) && !isCarryingItem)
         {
             if (hasNotMovedYet)
             {
@@ -413,12 +416,12 @@ public class PlayerController2D : MonoBehaviour
             _motor.Dash();
         }
 
-        if (Input.GetButtonDown(PC2D.Input.GRAB) && isInItem)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isInItem)
         {
             Carrying();
         }
 
-        if (Input.GetButtonUp(PC2D.Input.GRAB) && isCarryingItem)
+        if (Input.GetKeyUp(KeyCode.LeftShift) && isCarryingItem)
         {
             NotCarrying();
         }
@@ -427,12 +430,20 @@ public class PlayerController2D : MonoBehaviour
     public void ItStartedToMove()
     {
         isStartingToMove = false;
+        closeUpCamera.gameObject.SetActive(false);
     }
 
     private void NotCarrying()
     {
         isCarryingItem = false;
         carryingItem.GetComponent<Item>().ReleaseItem();
+        _motor.groundSpeed = defaultGroundSpeed;
+        _motor.jumpHeight = defaultJumpHeight;
+        _motor.airSpeed = defaultAirSpeed;
+    }
+
+    public void ReturnNormalValues()
+    {
         _motor.groundSpeed = defaultGroundSpeed;
         _motor.jumpHeight = defaultJumpHeight;
         _motor.airSpeed = defaultAirSpeed;

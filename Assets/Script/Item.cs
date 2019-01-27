@@ -13,6 +13,8 @@ public class Item : MonoBehaviour
     [SerializeField]
     private Type itemType;
     [SerializeField]
+    private bool isFinalItem;
+    [SerializeField]
     private SpriteRenderer spriteToActivate;
     [SerializeField]
     private Explodable objectToExplode;
@@ -47,16 +49,33 @@ public class Item : MonoBehaviour
 
     public void ReturnItem()
     {
-        spriteToActivate.enabled = true;
-        objectToExplode.explode();
-        cameraToTransition.gameObject.SetActive(true);
+        if (spriteToActivate != null)
+        {
+            spriteToActivate.enabled = true;
+
+        }
+        if (objectToExplode != null)
+        {
+            objectToExplode.explode();
+        }
+        if (cameraToTransition != null)
+        {
+            cameraToTransition.gameObject.SetActive(true);
+        }
         transform.parent.GetComponent<PlayerController2D>().isCarryingItem = false;
-        Invoke("DeactivateCamera", 6f);
+        transform.parent.GetComponent<PlayerController2D>().ReturnNormalValues();
+        if (!isFinalItem)
+        {
+            Invoke("DeactivateCamera", 6f);
+        }
     }
 
     private void DeactivateCamera()
     {
-        cameraToTransition.gameObject.SetActive(false);
+        if (cameraToTransition != null)
+        {
+            cameraToTransition.gameObject.SetActive(false);
+        }
         Destroy(gameObject);
     }
 
@@ -65,8 +84,9 @@ public class Item : MonoBehaviour
         GetComponent<Explodable>().explode();
     }
 
-    private void OnTriggeEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("it triggered with " + collision.name);
         if (collision.CompareTag("DroppingArea"))
         {
             ReturnItem();
