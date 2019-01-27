@@ -413,12 +413,12 @@ public class PlayerController2D : MonoBehaviour
             _motor.Dash();
         }
 
-        if (Input.GetButtonDown(PC2D.Input.GRAB) && isInItem)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isInItem)
         {
             Carrying();
         }
 
-        if (Input.GetButtonUp(PC2D.Input.GRAB) && isCarryingItem)
+        if (Input.GetKeyUp(KeyCode.LeftShift) && isCarryingItem)
         {
             NotCarrying();
         }
