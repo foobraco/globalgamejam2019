@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Timeline;
+using InControl;
 
 /// <summary>
 /// This class is a simple example of how to build a controller that interacts with PlatformerMotor2D.
@@ -80,6 +81,7 @@ public class PlayerController2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Debug.Log("X value for " + InputManager.ActiveDevice.Direction.X);
         // use last state to restore some ladder specific values
         if (_motor.motorState != PlatformerMotor2D.MotorState.FreedomState)
         {
@@ -94,7 +96,7 @@ public class PlayerController2D : MonoBehaviour
 
         // Jump?
         // If you want to jump in ladders, leave it here, otherwise move it down
-        if (Input.GetButtonDown(PC2D.Input.JUMP))
+        if (InputManager.ActiveDevice.Action1.WasPressed)
         {
             isChargingJump = true;
             timeChargingJump = 0f;
@@ -105,7 +107,7 @@ public class PlayerController2D : MonoBehaviour
             timeChargingJump += Time.deltaTime;
         }
 
-        if (Input.GetButtonUp(PC2D.Input.JUMP))
+        if (InputManager.ActiveDevice.Action1.WasReleased)
         {
             if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
             {
@@ -128,25 +130,25 @@ public class PlayerController2D : MonoBehaviour
         // XY freedom movement
         if (_motor.motorState == PlatformerMotor2D.MotorState.FreedomState)
         {
-            _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
-            _motor.normalizedYMovement = Input.GetAxis(PC2D.Input.VERTICAL);
+            _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
+            _motor.normalizedYMovement = InputManager.ActiveDevice.Direction.Y;
 
             return; // do nothing more
         }
 
         // X axis movement
-        if (Mathf.Abs(Input.GetAxis(PC2D.Input.HORIZONTAL)) > PC2D.Globals.INPUT_THRESHOLD)
+        if (Mathf.Abs(InputManager.ActiveDevice.Direction.X) > PC2D.Globals.INPUT_THRESHOLD)
         {
-            _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+            _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
         }
         else
         {
             _motor.normalizedXMovement = 0;
         }
 
-        if (Input.GetAxis(PC2D.Input.VERTICAL) != 0)
+        if (InputManager.ActiveDevice.Direction.Y != 0)
         {
-            bool up_pressed = Input.GetAxis(PC2D.Input.VERTICAL) > 0;
+            bool up_pressed = InputManager.ActiveDevice.Direction.Y > 0;
             if (_motor.IsOnLadder())
             {
                 if (
@@ -171,27 +173,27 @@ public class PlayerController2D : MonoBehaviour
                     _motor.oneWayPlatformsAreWalls = false;
 
                     // start XY movement
-                    _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
-                    _motor.normalizedYMovement = Input.GetAxis(PC2D.Input.VERTICAL);
+                    _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
+                    _motor.normalizedYMovement = InputManager.ActiveDevice.Direction.Y;
                 }
             }
         }
-        else if (Input.GetAxis(PC2D.Input.VERTICAL) < -PC2D.Globals.FAST_FALL_THRESHOLD)
+        else if (InputManager.ActiveDevice.Direction.Y < -PC2D.Globals.FAST_FALL_THRESHOLD)
         {
             _motor.fallFast = false;
         }
 
-        if (Input.GetButtonDown(PC2D.Input.DASH))
+        if (InputManager.ActiveDevice.Action2.WasPressed)
         {
             _motor.Dash();
         }
 
-        if (Input.GetButtonDown(PC2D.Input.GRAB) && isInItem)
+        if (InputManager.ActiveDevice.Action3.WasPressed && isInItem)
         {
             Carrying();
         }
 
-        if (Input.GetButtonUp(PC2D.Input.GRAB) && isCarryingItem)
+        if (InputManager.ActiveDevice.Action3.WasReleased && isCarryingItem)
         {
             NotCarrying();
         }
