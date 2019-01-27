@@ -23,6 +23,10 @@ public class PlayerController2D : MonoBehaviour
     public bool isChargingJump;
     [HideInInspector]
     public bool isCarryingItem;
+    [HideInInspector]
+    public bool hasNotMovedYet;
+    [HideInInspector]
+    public bool isStartingToMove;
 
     [SerializeField]
     private float rechargedJumpHeight = 6f;
@@ -34,6 +38,10 @@ public class PlayerController2D : MonoBehaviour
     private float carryingJumpHeight = 2f;
     [SerializeField]
     private float carryingJumpSpeed = 2f;
+    [SerializeField]
+    private AudioClip walkClip;
+    [SerializeField]
+    private AudioClip jumpClip;
 
 
     private PlatformerMotor2D _motor;
@@ -47,14 +55,18 @@ public class PlayerController2D : MonoBehaviour
     private float defaultAirSpeed;
     private bool isInItem;
     private GameObject nearestItem;
+    private AudioSource audioSource;
 
     // Use this for initialization
     void Start()
     {
         _motor = GetComponent<PlatformerMotor2D>();
+        audioSource = GetComponent<AudioSource>();
         defaultJumpHeight = _motor.jumpHeight;
         defaultGroundSpeed = _motor.groundSpeed;
         defaultAirSpeed = _motor.airSpeed;
+        hasNotMovedYet = true;
+        isStartingToMove = false;
     }
 
     // before enter en freedom state for ladders
@@ -90,7 +102,6 @@ public class PlayerController2D : MonoBehaviour
 
     private void UpdateWithController()
     {
-        Debug.Log("X value for " + InputManager.ActiveDevice.Direction.X);
         // use last state to restore some ladder specific values
         if (_motor.motorState != PlatformerMotor2D.MotorState.FreedomState)
         {
@@ -107,6 +118,11 @@ public class PlayerController2D : MonoBehaviour
         // If you want to jump in ladders, leave it here, otherwise move it down
         if (InputManager.ActiveDevice.Action1.WasPressed)
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             isChargingJump = true;
             timeChargingJump = 0f;
         }
@@ -116,9 +132,14 @@ public class PlayerController2D : MonoBehaviour
             timeChargingJump += Time.deltaTime;
         }
 
-        if (InputManager.ActiveDevice.Action1.WasReleased)
+        if (InputManager.ActiveDevice.Action1.WasPressed)
         {
-            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
+            if (InputManager.ActiveDevice.Direction.Down.IsPressed && !isCarryingItem)
             {
                 _motor.jumpHeight = rechargedJumpHeight;
                 _motor.Jump();
@@ -130,6 +151,7 @@ public class PlayerController2D : MonoBehaviour
                 _motor.Jump();
                 _motor.DisableRestrictedArea();
             }
+            audioSource.PlayOneShot(jumpClip);
             timeChargingJump = 0f;
             isChargingJump = false;
         }
@@ -148,7 +170,20 @@ public class PlayerController2D : MonoBehaviour
         // X axis movement
         if (Mathf.Abs(InputManager.ActiveDevice.Direction.X) > PC2D.Globals.INPUT_THRESHOLD)
         {
-            _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
+            if (!isStartingToMove)
+            {
+                _motor.normalizedXMovement = InputManager.ActiveDevice.Direction.X;
+                if (!audioSource.isPlaying && _motor.IsGrounded())
+                {
+                    audioSource.clip = walkClip;
+                    audioSource.Play();
+                }
+            }
         }
         else
         {
@@ -157,6 +192,11 @@ public class PlayerController2D : MonoBehaviour
 
         if (InputManager.ActiveDevice.Direction.Y != 0)
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             bool up_pressed = InputManager.ActiveDevice.Direction.Y > 0;
             if (_motor.IsOnLadder())
             {
@@ -189,12 +229,22 @@ public class PlayerController2D : MonoBehaviour
         }
         else if (InputManager.ActiveDevice.Direction.Y < -PC2D.Globals.FAST_FALL_THRESHOLD)
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             _motor.fallFast = false;
         }
 
         if (InputManager.ActiveDevice.Action2.WasPressed)
         {
             _motor.Dash();
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
         }
 
         if (InputManager.ActiveDevice.Action3.WasPressed && isInItem)
@@ -228,6 +278,11 @@ public class PlayerController2D : MonoBehaviour
         {
             isChargingJump = true;
             timeChargingJump = 0f;
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
         }
 
         if (isChargingJump)
@@ -235,9 +290,14 @@ public class PlayerController2D : MonoBehaviour
             timeChargingJump += Time.deltaTime;
         }
 
-        if (Input.GetButtonUp(PC2D.Input.JUMP))
+        if (Input.GetButtonDown(PC2D.Input.JUMP))
         {
-            if (timeChargingJump >= rechargedJumpTime && !isCarryingItem)
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
+            if (Input.GetAxis(PC2D.Input.VERTICAL) < 0f && !isCarryingItem)
             {
                 _motor.jumpHeight = rechargedJumpHeight;
                 _motor.Jump();
@@ -249,6 +309,7 @@ public class PlayerController2D : MonoBehaviour
                 _motor.Jump();
                 _motor.DisableRestrictedArea();
             }
+            audioSource.PlayOneShot(jumpClip);
             timeChargingJump = 0f;
             isChargingJump = false;
         }
@@ -258,6 +319,11 @@ public class PlayerController2D : MonoBehaviour
         // XY freedom movement
         if (_motor.motorState == PlatformerMotor2D.MotorState.FreedomState)
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
             _motor.normalizedYMovement = Input.GetAxis(PC2D.Input.VERTICAL);
 
@@ -267,15 +333,35 @@ public class PlayerController2D : MonoBehaviour
         // X axis movement
         if (Mathf.Abs(Input.GetAxis(PC2D.Input.HORIZONTAL)) > PC2D.Globals.INPUT_THRESHOLD)
         {
-            _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
+            if (!isStartingToMove)
+            {
+                _motor.normalizedXMovement = Input.GetAxis(PC2D.Input.HORIZONTAL);
+                if (!audioSource.isPlaying && _motor.IsGrounded())
+                {
+                    audioSource.clip = walkClip;
+                    audioSource.Play();
+                }
+            }
         }
         else
         {
             _motor.normalizedXMovement = 0;
+            audioSource.Stop();
+            audioSource.clip = null;
         }
 
         if (Input.GetAxis(PC2D.Input.VERTICAL) != 0)
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             bool up_pressed = Input.GetAxis(PC2D.Input.VERTICAL) > 0;
             if (_motor.IsOnLadder())
             {
@@ -313,6 +399,11 @@ public class PlayerController2D : MonoBehaviour
 
         if (Input.GetButtonDown(PC2D.Input.DASH))
         {
+            if (hasNotMovedYet)
+            {
+                hasNotMovedYet = false;
+                isStartingToMove = true;
+            }
             _motor.Dash();
         }
 
@@ -325,6 +416,11 @@ public class PlayerController2D : MonoBehaviour
         {
             NotCarrying();
         }
+    }
+
+    public void ItStartedToMove()
+    {
+        isStartingToMove = false;
     }
 
     private void NotCarrying()

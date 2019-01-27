@@ -39,7 +39,7 @@ namespace PC2D
                                  _motor.motorState == PlatformerMotor2D.MotorState.FallingFast))
             {
                 _isJumping = true;
-                _animator.Play("Jump");
+                _animator.Play("Fall");
 
                 if (_motor.velocity.x <= -0.1f)
                 {
@@ -59,9 +59,16 @@ namespace PC2D
                 visualChild.transform.rotation = Quaternion.identity;
 
                 if (_motor.motorState == PlatformerMotor2D.MotorState.Falling ||
-                                 _motor.motorState == PlatformerMotor2D.MotorState.FallingFast)
+                                 _motor.motorState == PlatformerMotor2D.MotorState.FallingFast && !playerController.isStartingToMove)
                 {
-                    _animator.Play("Fall");
+                    if (playerController.isCarryingItem)
+                    {
+                        _animator.Play("CarryJump");
+                    }
+                    else
+                    {
+                        _animator.Play("Jump");
+                    }
                 }
                 else if (_motor.motorState == PlatformerMotor2D.MotorState.WallSliding ||
                          _motor.motorState == PlatformerMotor2D.MotorState.WallSticking)
@@ -76,13 +83,13 @@ namespace PC2D
                 {
                     _animator.Play("Slip");
                 }
-                else if (_motor.motorState == PlatformerMotor2D.MotorState.Dashing)
+                else if (_motor.motorState == PlatformerMotor2D.MotorState.Dashing && !playerController.isStartingToMove)
                 {
                     _animator.Play("Dash");
                 }
                 else
                 {
-                    if (_motor.velocity.sqrMagnitude >= 0.1f * 0.1f)
+                    if (_motor.velocity.sqrMagnitude >= 0.1f * 0.1f && !playerController.isStartingToMove)
                     {
                         if (playerController.isCarryingItem)
                         {
@@ -99,22 +106,34 @@ namespace PC2D
                         {
                             if (playerController.isCarryingItem)
                             {
-                                _animator.Play("CarryJump");
+                                _animator.Play("Fall");
                             }
                             else
                             {
-                                _animator.Play("Jump");
+                                _animator.Play("Fall");
                             }
                         }
                         else
                         {
-                            if (playerController.isCarryingItem)
+                            if (playerController.hasNotMovedYet)
                             {
-                                _animator.Play("CarryIdle");
+                                _animator.Play("Sitting");
+                            }
+                            else if (playerController.isStartingToMove)
+                            {
+                                _animator.Play("StandUp");
+                                Invoke("StartMoving", 1f);
                             }
                             else
                             {
-                                _animator.Play("Idle");
+                                if (playerController.isCarryingItem)
+                                {
+                                    _animator.Play("CarryIdle");
+                                }
+                                else
+                                {
+                                    _animator.Play("Idle");
+                                }
                             }
 
                         }
@@ -139,6 +158,11 @@ namespace PC2D
                 newScale.x = Mathf.Abs(newScale.x) * ((valueCheck > 0) ? 1.0f : -1.0f);
                 visualChild.transform.localScale = newScale;
             }
+        }
+
+        private void StartMoving()
+        {
+            playerController.ItStartedToMove();
         }
 
         private void SetCurrentFacingLeft()
