@@ -184,19 +184,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   additionalRaycastsPerSide: 0
-  groundSpeed: 4
+  groundSpeed: 10
   timeToGroundSpeed: 0.1
   groundStopDistance: 0.333
   airSpeed: 5
   changeDirectionInAir: 1
   timeToAirSpeed: 0.2
   airStopDistance: 2
-  fallSpeed: 3
+  fallSpeed: 10
   gravityMultiplier: 2
   fastFallSpeed: 32
   fastFallGravityMultiplier: 4
   ladderSpeed: 5
-  jumpHeight: 4
+  jumpHeight: 12
   extraJumpHeight: 1.5
   numOfAirJumps: 0
   jumpWindowWhenFalling: 0.2
@@ -208,15 +208,15 @@ MonoBehaviour:
   speedMultiplierOnSlope: 0.75
   stickOnGround: 0
   distanceToCheckToStick: 0.75
-  enableWallJumps: 1
+  enableWallJumps: 0
   wallJumpMultiplier: 1
   wallJumpAngle: 70
-  enableWallSticks: 1
+  enableWallSticks: 0
   wallSticksDuration: 1
-  enableWallSlides: 1
+  enableWallSlides: 0
   wallSlideSpeed: 5
   timeToWallSlideSpeed: 3
-  enableCornerGrabs: 1
+  enableCornerGrabs: 0
   cornerGrabDuration: 1000
   cornerJumpMultiplier: 0.5
   cornerDistanceCheck: 0.2
@@ -225,9 +225,9 @@ MonoBehaviour:
   wallInteractionCooldown: 0.1
   wallInteractionThreshold: 0.75
   enableDashes: 1
-  dashDistance: 3
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashDistance: 16
+  dashDuration: 0.4
+  dashCooldown: 0.5
   dashEasingFunction: 1
   endDashNoGravityDuration: 0.1
   movingPlatformDebug: 0
@@ -249,8 +249,8 @@ MonoBehaviour:
   carryingItem: {fileID: 0}
   isChargingJump: 0
   isCarryingItem: 0
-  rechargedJumpHeight: 6
-  rechargedJumpTime: 1.5
+  rechargedJumpHeight: 20
+  rechargedJumpTime: 0.5
   carryingGroundSpeed: 2
   carryingJumpHeight: 2
   carryingJumpSpeed: 2

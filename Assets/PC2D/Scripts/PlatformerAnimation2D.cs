@@ -86,7 +86,7 @@ namespace PC2D
                     {
                         if (playerController.isCarryingItem)
                         {
-                            _animator.Play("On Corner");
+                            _animator.Play("CarryWalk");
                         }
                         else
                         {
@@ -97,13 +97,20 @@ namespace PC2D
                     {
                         if (playerController.isChargingJump)
                         {
-                            _animator.Play("Jump");
+                            if (playerController.isCarryingItem)
+                            {
+                                _animator.Play("CarryJump");
+                            }
+                            else
+                            {
+                                _animator.Play("Jump");
+                            }
                         }
                         else
                         {
                             if (playerController.isCarryingItem)
                             {
-                                _animator.Play("On Corner");
+                                _animator.Play("CarryIdle");
                             }
                             else
                             {
